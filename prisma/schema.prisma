@@ -1,0 +1,114 @@
+// =============================================================
+// SCHEMA PRISMA — Jeu de collection de mots (v2 : système hybride)
+// =============================================================
+// Changements vs v1 :
+//   - Rareté remplacée par "tier de drop" (1, 2, 3)
+//   - Fréquence visible comme stat sur la carte du mot
+//   - Collection ajoutée pour les drops thématiques
+//   - Pas de label COMMUN/RARE/LEGENDAIRE — la valeur émerge du marché
+// =============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =============================================================
+// TABLE : MOTS
+// =============================================================
+model Mot {
+  id          Int       @id @default(autoincrement())
+  mot         String    @unique              // Le mot (unique dans tout le jeu)
+  definition  String?                        // Définition (enrichie plus tard)
+  tier        Int       @default(1)          // Tier de drop : 1=facile, 2=moyen, 3=difficile à obtenir
+  categorie   String                         // nom, verbe, adjectif, adverbe
+  longueur    Int                            // Nombre de lettres
+  frequence   Float     @default(0)          // Fréquence d'usage (STAT VISIBLE sur la carte)
+  collection  String    @default("fondation") // "fondation", "verbes", "adjectifs"...
+  actif       Boolean   @default(true)        // false = pas encore droppable (futurs drops)
+  createdAt   DateTime  @default(now())
+
+  inventaire   Inventaire?
+  marche       Marche?
+  transactions Transaction[]
+
+  @@index([tier, actif])                     // Index pour le tirage pondéré
+  @@index([categorie])
+  @@index([collection])
+  @@index([frequence])
+  @@map("mots")
+}
+
+// =============================================================
+// TABLE : JOUEURS
+// =============================================================
+model Joueur {
+  id              String    @id @default(uuid())
+  pseudo          String    @unique
+  email           String    @unique
+  monnaie         Int       @default(100)
+  dernierPack     DateTime?
+  dateInscription DateTime  @default(now())
+
+  inventaire      Inventaire[]
+  ventesMarche    Marche[]        @relation("Vendeur")
+  achats          Transaction[]   @relation("Acheteur")
+  ventes          Transaction[]   @relation("VendeurTransaction")
+
+  @@map("joueurs")
+}
+
+// =============================================================
+// TABLE : INVENTAIRE
+// =============================================================
+model Inventaire {
+  id        Int      @id @default(autoincrement())
+  joueurId  String
+  motId     Int      @unique                  // UN mot = UN propriétaire
+  obtenuLe  DateTime @default(now())
+  slot      Int?                              // Emplacement dans le pack (1, 2 ou 3)
+
+  joueur    Joueur   @relation(fields: [joueurId], references: [id])
+  mot       Mot      @relation(fields: [motId], references: [id])
+
+  @@unique([joueurId, motId])
+  @@map("inventaire")
+}
+
+// =============================================================
+// TABLE : MARCHÉ
+// =============================================================
+model Marche {
+  id              Int      @id @default(autoincrement())
+  vendeurId       String
+  motId           Int      @unique
+  prix            Int
+  dateMiseEnVente DateTime @default(now())
+
+  vendeur         Joueur   @relation("Vendeur", fields: [vendeurId], references: [id])
+  mot             Mot      @relation(fields: [motId], references: [id])
+
+  @@map("marche")
+}
+
+// =============================================================
+// TABLE : TRANSACTIONS
+// =============================================================
+model Transaction {
+  id          Int      @id @default(autoincrement())
+  acheteurId  String
+  vendeurId   String
+  motId       Int
+  prix        Int
+  date        DateTime @default(now())
+
+  acheteur    Joueur   @relation("Acheteur", fields: [acheteurId], references: [id])
+  vendeur     Joueur   @relation("VendeurTransaction", fields: [vendeurId], references: [id])
+  mot         Mot      @relation(fields: [motId], references: [id])
+
+  @@map("transactions")
+}

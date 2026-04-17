@@ -1,0 +1,103 @@
+# =============================================================
+# LISTE DE BLOCAGE — Mots offensants ou inappropriés
+# =============================================================
+#
+# Un mot par ligne. Les lignes commençant par # sont ignorées.
+# Tu peux ajouter des mots à cette liste et relancer le script.
+#
+# IMPORTANT : cette liste est volontairement conservatrice.
+# Certains mots ont des usages légitimes mais sont souvent
+# utilisés de manière offensante. À toi de décider au cas par cas.
+#
+# Pour relancer après modification :
+#   node scripts/nettoyer-dictionnaire.mjs
+#
+# =============================================================
+
+# ── Insultes et injures ──
+connard
+connasse
+enculé
+enfoiré
+salaud
+salope
+salopard
+ordure
+pouffiasse
+pétasse
+branleur
+abruti
+crétin
+bâtard
+fumier
+raclure
+trouduc
+
+# ── Termes racistes et discriminatoires ──
+nègre
+négresse
+bougnoule
+bicot
+youpin
+youpine
+raton
+chinetoque
+bridé
+crouille
+melon
+bougnoul
+bamboula
+moricaud
+niaque
+
+# ── Termes homophobes ──
+pédé
+pédale
+gouine
+tapette
+tantouze
+tarlouze
+fiotte
+
+# ── Termes sexistes et vulgaires ──
+putain
+pute
+catin
+garce
+trainée
+traînée
+pouf
+pouffe
+nymphomane
+gigolo
+
+# ── Vulgarités crues ──
+merde
+chiure
+chiasse
+branlette
+couille
+couilles
+fion
+nichon
+nichons
+nibard
+nibards
+
+# ── Termes liés à la violence ──
+pogrom
+
+# ── Termes que tu peux vouloir garder ──
+# Décommente (enlève le #) pour les bloquer aussi :
+#
+# idiot        ← usage courant, peut-être OK dans le jeu
+# imbécile     ← idem
+con          ← très courant en français familier
+# cul          ← anatomique, mais vulgaire
+# fesse        ← anatomique, neutre
+# sein         ← anatomique, neutre
+# pénis        ← anatomique, neutre
+# vagin        ← anatomique, neutre
+# prostituée   ← terme descriptif, pas une insulte
+esclave      ← terme historique
+nazi         ← terme historique
