@@ -135,57 +135,55 @@ function parserLexique() {
 }
 
 // =============================================================
-// ÉTAPE 3 : Calculer les tiers de drop (LOGIQUE INVERSÉE)
+// ÉTAPE 3 : Calculer les tiers de drop
 // =============================================================
 //
-// La clé du système hybride :
-//
 //   TIER 3 (drop DIFFICILE, 5-20% selon le slot)
-//     → Les mots les plus FRÉQUENTS en français
-//     → "maison", "pantalon", "soleil"
-//     → Tout le monde les veut → ils sont durs à obtenir
+//     → Les mots les moins FRÉQUENTS en français
+//     → "flavescent", "smaragdin", "hypostase"
+//     → Rares dans la vraie vie → rares dans le jeu
 //
 //   TIER 2 (drop MOYEN, 9-45% selon le slot)
-//     → Mots reconnaissables mais pas iconiques
+//     → Mots reconnaissables mais pas courants
 //     → "boulangerie", "crépuscule", "parapluie"
 //
 //   TIER 1 (drop FACILE, 35-90% selon le slot)
-//     → Mots rares/obscurs en français
-//     → "flavescent", "smaragdin", "hypostase"
-//     → Peu de gens les connaissent → drop facile
+//     → Mots très fréquents en français
+//     → "maison", "pantalon", "soleil"
+//     → Communs dans la vraie vie → communs dans le jeu
 //
 // =============================================================
 
 function calculerTiers(mots) {
-  console.log("\n🎲 Calcul des tiers de drop (logique inversée)...");
+  console.log("\n🎲 Calcul des tiers de drop...");
 
   // Trier par fréquence CROISSANTE (les plus rares d'abord)
   const parFrequence = [...mots].sort((a, b) => a.frequence - b.frequence);
 
-  // Seuils : les mots les plus fréquents sont les plus durs à obtenir
+  // Seuils : les mots les moins fréquents sont les plus durs à obtenir
   //
-  //  ├── 60% des mots (les moins fréquents) ──→ Tier 1 (drop facile)
-  //  ├── 30% des mots (fréquence moyenne)    ──→ Tier 2 (drop moyen)
-  //  └── 10% des mots (les plus fréquents)   ──→ Tier 3 (drop difficile)
+  //  ├── 10% des mots (les moins fréquents) ──→ Tier 3 (drop difficile)
+  //  ├── 30% des mots (fréquence moyenne)   ──→ Tier 2 (drop moyen)
+  //  └── 60% des mots (les plus fréquents)  ──→ Tier 1 (drop facile)
   //
-  // On met 10% en tier 3 (et non 5%) parce que les probabilités de drop
+  // On met 10% en tier 3 parce que les probabilités de drop
   // du slot 3 montent jusqu'à 20% — il faut assez de mots pour alimenter
   // le tirage sans que le pool se vide trop vite.
 
-  const seuilTier2 = Math.floor(parFrequence.length * 0.60);
-  const seuilTier3 = Math.floor(parFrequence.length * 0.90);
+  const seuilTier3 = Math.floor(parFrequence.length * 0.10);
+  const seuilTier2 = Math.floor(parFrequence.length * 0.40);
 
   let stats = { 1: 0, 2: 0, 3: 0 };
 
   for (let i = 0; i < parFrequence.length; i++) {
     const m = parFrequence[i];
 
-    if (i < seuilTier2) {
-      m.tier = 1; // Mot rare en français → drop facile
-    } else if (i < seuilTier3) {
+    if (i < seuilTier3) {
+      m.tier = 3; // Mot rare en français → drop difficile
+    } else if (i < seuilTier2) {
       m.tier = 2; // Mot courant → drop moyen
     } else {
-      m.tier = 3; // Mot très fréquent → drop difficile (prisé)
+      m.tier = 1; // Mot très fréquent → drop facile
     }
 
     stats[m.tier]++;
@@ -197,11 +195,11 @@ function calculerTiers(mots) {
   console.log(`   Tier 3 (drop difficile) : ${stats[3]} mots (${((stats[3] / total) * 100).toFixed(1)}%)`);
 
   // Exemples par tier
-  const exemplesTier1 = parFrequence.filter((m) => m.tier === 1).slice(0, 5);
-  const exemplesTier3 = parFrequence.filter((m) => m.tier === 3).slice(-5);
+  const exemplesTier3 = parFrequence.filter((m) => m.tier === 3).slice(0, 5);
+  const exemplesTier1 = parFrequence.filter((m) => m.tier === 1).slice(-5);
 
-  console.log(`\n   Exemples Tier 1 (obscurs) : ${exemplesTier1.map((m) => m.mot).join(", ")}`);
-  console.log(`   Exemples Tier 3 (prisés)  : ${exemplesTier3.map((m) => m.mot).join(", ")}`);
+  console.log(`\n   Exemples Tier 3 (obscurs) : ${exemplesTier3.map((m) => m.mot).join(", ")}`);
+  console.log(`   Exemples Tier 1 (communs) : ${exemplesTier1.map((m) => m.mot).join(", ")}`);
 
   return mots;
 }

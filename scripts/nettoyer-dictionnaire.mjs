@@ -281,13 +281,13 @@ async function recalculerTiers() {
   });
 
   const total = mots.length;
-  const seuilTier2 = Math.floor(total * 0.60);
-  const seuilTier3 = Math.floor(total * 0.90);
+  const seuilTier3 = Math.floor(total * 0.10);
+  const seuilTier2 = Math.floor(total * 0.40);
 
   const updates = { 1: [], 2: [], 3: [] };
 
   mots.forEach((m, i) => {
-    const tier = i < seuilTier2 ? 1 : i < seuilTier3 ? 2 : 3;
+    const tier = i < seuilTier3 ? 3 : i < seuilTier2 ? 2 : 1;
     updates[tier].push(m.id);
   });
 
@@ -308,21 +308,21 @@ async function recalculerTiers() {
   console.log(`   Tier 2 (drop moyen)     : ${updates[2].length} (${((updates[2].length / total) * 100).toFixed(1)}%)`);
   console.log(`   Tier 3 (drop difficile) : ${updates[3].length} (${((updates[3].length / total) * 100).toFixed(1)}%)`);
 
-  const exemplesT1 = await prisma.mot.findMany({
-    where: { tier: 1 },
+  const exemplesT3 = await prisma.mot.findMany({
+    where: { tier: 3 },
     orderBy: { frequence: "asc" },
     take: 5,
     select: { mot: true, frequence: true },
   });
-  const exemplesT3 = await prisma.mot.findMany({
-    where: { tier: 3 },
+  const exemplesT1 = await prisma.mot.findMany({
+    where: { tier: 1 },
     orderBy: { frequence: "desc" },
     take: 5,
     select: { mot: true, frequence: true },
   });
 
-  console.log(`\n   Exemples Tier 1 : ${exemplesT1.map((m) => m.mot).join(", ")}`);
-  console.log(`   Exemples Tier 3 : ${exemplesT3.map((m) => `${m.mot} (${m.frequence.toFixed(1)}/M)`).join(", ")}\n`);
+  console.log(`\n   Exemples Tier 3 (obscurs) : ${exemplesT3.map((m) => `${m.mot} (${m.frequence.toFixed(1)}/M)`).join(", ")}`);
+  console.log(`   Exemples Tier 1 (communs) : ${exemplesT1.map((m) => m.mot).join(", ")}\n`);
 }
 
 // =============================================================
